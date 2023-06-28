@@ -33,7 +33,11 @@ namespace TabloidMVC.Controllers
                 ModelState.AddModelError("Email", "Invalid email");
                 return View();
             }
-
+            if(userProfile.IsActive == false)
+            {
+                ModelState.AddModelError("Email", "Account Deactive");
+                return View();
+            }
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userProfile.Id.ToString()),
