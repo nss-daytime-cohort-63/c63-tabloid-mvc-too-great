@@ -22,7 +22,6 @@ namespace TabloidMVC.Controllers
             _postRepository = postRepository;
             _categoryRepository = categoryRepository;
         }
-
         public IActionResult Index()
         {
             var posts = _postRepository.GetAllPublishedPosts();
@@ -90,6 +89,27 @@ namespace TabloidMVC.Controllers
             try
             {
                 _postRepository.UpdatePost(post);
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return View(post);
+            }
+        }
+
+        public ActionResult Delete(int id)
+        {
+            Post post = _postRepository.GetPublishedPostById(id);
+            return View(post);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id, Post post)
+        {
+            try
+            {
+                _postRepository.DeletePost(id);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
