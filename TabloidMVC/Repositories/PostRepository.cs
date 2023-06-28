@@ -216,6 +216,24 @@ namespace TabloidMVC.Repositories
             }
         }
 
+        public void CurrentUsersPosts(int id, int userProfileId)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT *
+                        FROM Post
+                        WHERE id = @id AND UserProfileId = @userProfileId
+                    ";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@userProfileId", userProfileId);
+                }
+            }
+        }
+
         private Post NewPostFromReader(SqlDataReader reader)
         {
             return new Post()
