@@ -9,8 +9,12 @@ namespace TabloidMVC.Repositories
 
         List<UserProfile> GetAll();
 
+        List<UserProfile> GetDeactive();
+
         UserProfile GetById(int id);
 
         void DeactivateUser(int id);
+
+        void ReactivateUser(int id);
     }
 }

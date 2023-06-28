@@ -53,7 +53,48 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+        public List<UserProfile> GetDeactive()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"select userProfile.id as Id,FirstName,LastName,
+                                        DisplayName,Email,CreateDateTime,
+                                        UserTypeId,UserType.Name as Type 
+                                        from UserProfile join UserType 
+                                        on UserTypeId = userType.Id 
+                                        where isActive = 0
+                                        order by DisplayName
+                                       ";
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<UserProfile> Users = new List<UserProfile>();
+                        while (reader.Read())
+                        {
+                            UserProfile User = new UserProfile
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DisplayName = reader.GetString(reader.GetOrdinal("DisplayName")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")),
+                                CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                UserType = new UserType
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Type"))
+                                }
 
+                            };
+                            Users.Add(User);
+                        }
+                        return Users;
+                    }
+                }
+            }
+        }
         public UserProfile GetById(int id)
         {
             using(SqlConnection conn = Connection) { 
@@ -166,6 +207,24 @@ namespace TabloidMVC.Repositories
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        public void ReactivateUser(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Update UserProfile
+                                        Set isActive = 1
+                                        Where Id = @id";
+                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
         }
     }
 }
