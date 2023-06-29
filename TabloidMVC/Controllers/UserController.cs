@@ -23,6 +23,12 @@ namespace TabloidMVC.Controllers
             return View(users);
         }
 
+        public ActionResult AllDeactive()
+        {
+            List<UserProfile> users = _userRepo.GetDeactive();
+            return View(users);
+        }
+
         // GET: UserController/Details/5
         public ActionResult Details(int id)
         {
@@ -95,9 +101,19 @@ namespace TabloidMVC.Controllers
 
         public ActionResult Deactivate(int id)
         {
-          
+          int myId  = GetCurrentUserProfileId();
+        UserProfile myself = _userRepo.GetById(myId);
+
+            if(myself.UserTypeId == 1)
+            {
             UserProfile User = _userRepo.GetById(id);
             return View(User);
+
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         [HttpPost]
@@ -116,6 +132,43 @@ namespace TabloidMVC.Controllers
             }
         }
 
-       
+        public ActionResult Reactivate(int id)
+        {
+            int myId = GetCurrentUserProfileId();
+            UserProfile myself = _userRepo.GetById(myId);
+
+            if (myself.UserTypeId == 1)
+            {
+                UserProfile User = _userRepo.GetById(id);
+                return View(User);
+
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public ActionResult Reactivate(int id, UserProfile user)
+        {
+            try
+            {
+                _userRepo.ReactivateUser(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return View(user);
+            }
+        }
+        private int GetCurrentUserProfileId()
+        {
+            string id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.Parse(id);
+        }
+
     }
 }
