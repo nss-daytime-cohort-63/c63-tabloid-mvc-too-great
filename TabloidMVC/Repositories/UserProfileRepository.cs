@@ -56,7 +56,7 @@ namespace TabloidMVC.Repositories
         }
         public void Register(UserProfile userProfile)
         {
-            using (SqlConnection conn = Connection)
+            using(SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
