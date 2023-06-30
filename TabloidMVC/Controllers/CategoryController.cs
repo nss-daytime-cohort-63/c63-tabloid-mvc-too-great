@@ -12,16 +12,17 @@ namespace TabloidMVC.Controllers
         // GET: CategoryController
 
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IPostRepository _postRepository;
 
-        public CategoryController(ICategoryRepository categoryRepository)
+        public CategoryController(ICategoryRepository categoryRepository, IPostRepository postRepository)
         {
             _categoryRepository = categoryRepository;
+            _postRepository = postRepository;
         }
         public ActionResult Index()
         {
             List<Category> categories = _categoryRepository.GetAll();
             return View(categories);
-
         }
 
         // GET: CategoryController/Details/5
@@ -101,6 +102,11 @@ namespace TabloidMVC.Controllers
             {
                 return View(category);
             }
+        }
+        public ActionResult PostByCategory(int id)
+        {
+            List<Post> posts = _postRepository.GetPostByCategory(id);
+            return View(posts);
         }
     }
 }
