@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using TabloidMVC.Models;
@@ -53,7 +54,42 @@ namespace TabloidMVC.Repositories
                 }
             }
         }
+        public void Register(UserProfile userProfile)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                            INSERT INTO UserProfile (DisplayName, FirstName, LastName, 
+                                        Email, CreateDateTime, ImageLocation, UserTypeId, IsActive)
+                            OUTPUT INSERTED.ID
+                            VALUES (@displayName, @firstName, @lastName, @email, @createDateTime, @imageLocation,
+                                   2, 1);
+                            ";
 
+                    cmd.Parameters.AddWithValue("@displayName", userProfile.DisplayName);
+                    cmd.Parameters.AddWithValue("@firstName", userProfile.FirstName);
+                    cmd.Parameters.AddWithValue("@lastNAme", userProfile.LastName);
+                    cmd.Parameters.AddWithValue("@email", userProfile.Email);
+                    cmd.Parameters.AddWithValue("@createDateTime", DateAndTime.Now);
+
+                    if (userProfile.ImageLocation == null)
+                    {
+                        cmd.Parameters.AddWithValue("@imageLocation", DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@imageLocation", userProfile.ImageLocation);
+                    }
+
+                    int id = (int)cmd.ExecuteScalar();
+
+                    userProfile.Id = id;
+                }
+            }
+        }
         public List<UserProfile> AllAdmins()
         {
             using (SqlConnection conn = Connection)
