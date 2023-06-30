@@ -1,6 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -88,6 +87,49 @@ namespace TabloidMVC.Repositories
                     int id = (int)cmd.ExecuteScalar();
 
                     userProfile.Id = id;
+                }
+            }
+        }
+        public List<UserProfile> AllAdmins()
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"select userProfile.id as Id,FirstName,LastName,
+                                        DisplayName,Email,CreateDateTime,
+                                        UserTypeId,UserType.Name as Type 
+                                        from UserProfile join UserType 
+                                        on UserTypeId = userType.Id 
+                                        where UserTypeId = 1
+                                        order by DisplayName
+                                       ";
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        List<UserProfile> Users = new List<UserProfile>();
+                        while (reader.Read())
+                        {
+                            UserProfile User = new UserProfile
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DisplayName = reader.GetString(reader.GetOrdinal("DisplayName")),
+                                Email = reader.GetString(reader.GetOrdinal("Email")),
+                                CreateDateTime = reader.GetDateTime(reader.GetOrdinal("CreateDateTime")),
+                                
+                                UserType = new UserType
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("UserTypeId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Type"))
+                                }
+
+                            };
+                            Users.Add(User);
+                        }
+                        return Users;
+                    }
                 }
             }
         }
@@ -264,5 +306,44 @@ namespace TabloidMVC.Repositories
             }
 
         }
+
+        public void Edit(UserProfile user)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using(SqlCommand cmd =conn.CreateCommand())
+                {
+                    cmd.CommandText = @"Update UserProfile
+                                       Set 
+                                           FirstName = @firstName,
+                                           LastName = @lastName,
+                                           DisplayName = @displayName,
+                                           Email = @email,
+                                           UserTypeId = @userTypeId,
+                                           ImageLocation = @imageLocation
+                                           Where Id = @id";
+                    cmd.Parameters.AddWithValue("@firstName", user.FirstName);
+                    cmd.Parameters.AddWithValue("@lastName", user.LastName);
+                    cmd.Parameters.AddWithValue("@displayName", user.DisplayName);
+                    cmd.Parameters.AddWithValue("@email", user.Email);
+                    cmd.Parameters.AddWithValue("@userTypeId", user.UserTypeId);
+                    cmd.Parameters.AddWithValue("@id", user.Id);
+
+                    if (user.ImageLocation == null)
+                    {
+                        cmd.Parameters.AddWithValue("@imageLocation",DBNull.Value);
+                    }
+                    else
+                    {
+                    cmd.Parameters.AddWithValue("@imageLocation", user.ImageLocation);
+
+                    }
+                    cmd.ExecuteNonQuery ();
+                }
+            }
+        }
+
+        
     }
 }
