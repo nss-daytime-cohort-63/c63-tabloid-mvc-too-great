@@ -4,6 +4,7 @@ namespace TabloidMVC.Repositories
 {
     public interface IPostReactionRepository
     {
-        List<PostReaction> GetAllByPost();
+        List<PostReaction> GetAllByPost(int id);
+        void Add(PostReaction postReaction);
     }
 }
