@@ -13,12 +13,14 @@ namespace TabloidMVC.Controllers
     {
         private readonly IUserProfileRepository _userRepo;
         private readonly IUserTypeRepository _userTypeRepo;
+        private readonly IPostRepository _postRepo;
         // GET: UserController
 
-        public UserController(IUserProfileRepository userRepo, IUserTypeRepository userTypeRepo)
+        public UserController(IUserProfileRepository userRepo, IUserTypeRepository userTypeRepo, IPostRepository postRepo)
         {
             _userRepo = userRepo;
             _userTypeRepo = userTypeRepo;
+            _postRepo = postRepo;
         }
         public ActionResult Index()
         {
@@ -193,6 +195,11 @@ namespace TabloidMVC.Controllers
             {
                 return View(user);
             }
+        }
+        public ActionResult PostByUser(int id)
+        {
+            List<Post> posts = _postRepo.GetPostByUser(id);
+            return View(posts);
         }
         private int GetCurrentUserProfileId()
         {

@@ -13,5 +13,6 @@ namespace TabloidMVC.Repositories
         Post GetUserPostById(int id, int userProfileId);
         List<Post> CurrentUsersPosts(int id);
         List<Post> GetPostByCategory(int id);
+        List<Post> GetPostByUser(int id);
     }
 }
