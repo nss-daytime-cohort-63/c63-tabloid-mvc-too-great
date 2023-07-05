@@ -16,11 +16,16 @@ namespace TabloidMVC.Controllers
     {
         private readonly IPostRepository _postRepository;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IPostReactionRepository _postReactionRepository;
+        private readonly IReactionRepository _reactionRepository;
 
-        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository)
+        public PostController(IPostRepository postRepository, ICategoryRepository categoryRepository,IPostReactionRepository postReactionRepository,
+         IReactionRepository reactionRepository   )
         {
             _postRepository = postRepository;
             _categoryRepository = categoryRepository;
+            _postReactionRepository = postReactionRepository;
+            _reactionRepository = reactionRepository;
         }
         public IActionResult Index()
         {
@@ -37,7 +42,15 @@ namespace TabloidMVC.Controllers
 
         public IActionResult Details(int id)
         {
+            List <PostReaction> pr = _postReactionRepository.GetAllByPost(id);
+            List<Reaction> AllReactions = _reactionRepository.GetAll();
             var post = _postRepository.GetPublishedPostById(id);
+            PostReactionViewModel prvw = new PostReactionViewModel()
+            {
+                Post = post,
+                PostReactions = pr,
+                Reactions = AllReactions
+            };
             if (post == null)
             {
                 int userId = GetCurrentUserProfileId();
@@ -47,7 +60,30 @@ namespace TabloidMVC.Controllers
                     return NotFound();
                 }
             }
-            return View(post);
+            return View(prvw);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public IActionResult Details(int id, PostReactionViewModel prvw)
+        {
+            int userId = GetCurrentUserProfileId();
+            PostReaction pr = new PostReaction
+            {
+                PostId = id,
+                ReactionId = prvw.ReactionId,
+                UserProfileId = userId
+            };
+            try
+            {
+                _postReactionRepository.Add(pr);
+                return RedirectToAction(nameof(Details), new {id});
+            }
+            catch(Exception ex)
+            {
+                return RedirectToAction(nameof(Details), new { id });
+            }
         }
 
         public IActionResult Create()
